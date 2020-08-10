@@ -106,7 +106,7 @@ void requestLoop() {
 }
 
 bool clientSentExit(string_ptr message) {
-  return message->find("!exit") != std::string::npos;
+  return *message == "!exit";
 }
 
 void disconnectClient(socket_ptr sock) {
@@ -120,3 +120,21 @@ void disconnectClient(socket_ptr sock) {
   std::cout << "Client Disconnected! There are now " << clientList->size() <<
     " total clients connected." << std::endl;
 }
+
+void responseLoop() {
+  while(true) {
+    if(!messageQueue->empty()) {
+      auto message = messageQueue->front();
+
+      mu.lock();
+      for(auto& sock : *clientList) {
+        sock->write_some(buffer(*(message->begin()->second), bufSize));
+      }
+
+      messageQueue->pop();
+      mu.unlock();
+    }
+    boost::this_thread::sleep(boost::posix_time::millisec(sleepLen::LONG));
+  }
+}
+
