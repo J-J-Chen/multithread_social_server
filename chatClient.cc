@@ -98,7 +98,7 @@ void writeLoop(socket_ptr sock, string_ptr prompt) {
       sock->write_some(buffer(inputBuf, inputSize));
     }
 
-    if(inputMsg.find("!exit") != std::string::npos) {
+    if(*inputMsg == "!exit") {
       // TODO: Better clean up and error checking
       exit(1);
     }
